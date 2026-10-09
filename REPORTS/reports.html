@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="resq-api-base" content="">
+    <title>ResQ Admin | Reports</title>
+    <link rel="stylesheet" href="reports.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</head>
+<body>
+    
+    <header class="top-nav">
+        <div class="nav-left">
+            <div class="logo-box"><i data-lucide="shield-alert" size="16"></i></div>
+            <span class="brand">ResQ Admin</span>
+            <nav class="nav-links">
+                <a href="../DASHBOARD/dashboard.html">Dashboard</a>
+                <a href="reports.html" class="active">Reports</a>
+                <a href="../RISKREPORT/riskreport.html">Risk Report</a>
+                <a href="../NEWS/news.html">News</a>
+                <a href="../USERVER/user.html">Users</a>
+                <a href="../SMS/sms.html">SMS</a>
+
+            </nav>
+        </div>
+
+        <div class="nav-right">
+            <button class="btn-workspace" type="button" data-action="workspace">
+                <i data-lucide="map-pin" size="14"></i>
+                Mamburao
+            </button>
+            <button class="icon-btn" type="button" data-action="refresh" title="Refresh reports">
+                <i data-lucide="refresh-cw" size="16"></i>
+            </button>
+            <button class="icon-btn" type="button" data-action="logout" title="Logout">
+                <i data-lucide="log-out" size="16"></i>
+            </button>
+            <img src="https://ui-avatars.com/api/?name=Admin&background=FF8C00&color=fff" alt="Admin avatar" class="avatar">
+        </div>
+    </header>
+
+    <main class="reports-main">
+        <section class="page-header">
+            <div>
+                <h1>Incident Reports</h1>
+                <p>Create, verify, dispatch, and close emergency reports for the Municipality of Mamburao.</p>
+            </div>
+            <div class="header-actions">
+                
+                <button class="btn-primary" type="button" data-action="open-create">
+                    <i data-lucide="plus" size="14"></i>
+                    New Report
+                </button>
+            </div>
+        </section>
+
+        <section class="summary-grid" aria-label="Report summary">
+            <article class="summary-card">
+                <span>Total Reports</span>
+                <strong id="summaryTotal">0</strong>
+            </article>
+        </section>
+
+        <section class="toolbar" aria-label="Report filters">
+            <select id="typeFilter" aria-label="Filter by incident type">
+                <option value="all">All incident types</option>
+                <option value="FIRE">Fire</option>
+                <option value="FLOOD">Flood</option>
+                <option value="MEDICAL">Medical</option>
+                <option value="ACCIDENT">Accident</option>
+                <option value="LANDSLIDE">Landslide</option>
+                <option value="RESCUE">Rescue</option>
+                <option value="OTHER">Other</option>
+            </select>
+        </section>
+
+        <section class="reports-split-view">
+            <aside class="reports-list" aria-label="Recent reports">
+                <div class="list-heading">
+                    <h2>Recent Reports</h2>
+                    <span id="resultCount">0 found</span>
+                </div>
+                <div class="report-items" aria-live="polite"></div>
+            </aside>
+
+            <section class="report-detail" aria-live="polite">
+                <div class="empty-state">
+                    <i data-lucide="file-search" size="32"></i>
+                    <h2>Select a report</h2>
+                    <p>Choose a report from the list to inspect evidence, location, and moderation actions.</p>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <div class="modal-backdrop hidden" id="reportModal" aria-hidden="true">
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
+            <div class="modal-header">
+                <div>
+                    <span class="report-id">MAMBURAO INCIDENT INTAKE</span>
+                    <h2 id="reportModalTitle">New Report</h2>
+                </div>
+                <button class="icon-btn" type="button" data-action="close-create" title="Close">
+                    <i data-lucide="x" size="16"></i>
+                </button>
+            </div>
+           <form id="createReportForm" class="report-form">
+
+    <div class="form-grid">
+
+        
+
+        <div class="form-group">
+
+            <label>
+                Incident Type
+            </label>
+
+            <select
+                name="type"
+                required
+            >
+
+                <option value="FIRE">
+                    FIRE
+                </option>
+
+                <option value="FLOOD">
+                    FLOOD
+                </option>
+
+                <option value="MEDICAL">
+                    MEDICAL
+                </option>
+
+                <option value="ACCIDENT">
+                    ACCIDENT
+                </option>
+
+                <option value="LANDSLIDE">
+                    LANDSLIDE
+                </option>
+
+                <option value="OTHER">
+                    OTHER
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                Priority
+            </label>
+
+            <select
+                name="priority"
+                required
+            >
+
+                <option value="low">
+                    Low
+                </option>
+
+                <option value="medium">
+                    Medium
+                </option>
+
+                <option value="high">
+                    High
+                </option>
+
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                Reporter Name
+            </label>
+
+            <input
+                type="text"
+                name="reporter"
+                placeholder="Enter reporter name"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                Mobile Number
+            </label>
+
+            <input
+                type="text"
+                name="mobile"
+                placeholder="09XXXXXXXXX"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                Location
+            </label>
+
+            <select
+                name="location"
+                required
+            >
+
+                <option value="">
+                    Select Barangay
+                </option>
+
+                <option value="Balansay">
+                    Balansay
+                </option>
+
+                <option value="Fatima">
+                    Fatima
+                </option>
+
+                <option value="Tayamaan">
+                    Tayamaan
+                </option>
+
+                <option value="Payompon">
+                    Payompon
+                </option>
+
+                <option value="Poblacion 1">
+                    Poblacion 1
+                </option>
+
+                <option value="Poblacion 2">
+                    Poblacion 2
+                </option>
+
+                <option value="Poblacion 3">
+                    Poblacion 3
+                </option>
+
+                <option value="Poblacion 4">
+                    Poblacion 4
+                </option>
+
+                <option value="Poblacion 5">
+                    Poblacion 5
+                </option>
+
+                <option value="Poblacion 6">
+                    Poblacion 6
+                </option>
+
+                <option value="Poblacion 7">
+                    Poblacion 7
+                </option>
+
+                <option value="Poblacion 8">
+                    Poblacion 8
+                </option>
+
+                <option value="San Luis">
+                    San Luis
+                </option>
+
+                <option value="Tangkalan">
+                    Tangkalan
+                </option>
+
+                <option value="Talabaan">
+                    Talabaan
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <div class="form-group full-width">
+
+            <label>
+                Description
+            </label>
+
+            <textarea
+                name="description"
+                rows="4"
+                placeholder="Describe the incident..."
+                required
+            ></textarea>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                Assigned Unit
+            </label>
+
+            <input
+                type="text"
+                name="assignedTo"
+                placeholder="MDRRMO / Rescue Team"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                Responder
+            </label>
+
+            <input
+                type="text"
+                name="responder"
+                placeholder="Responder name"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                ETA Minutes
+            </label>
+
+            <input
+                type="number"
+                name="etaMinutes"
+                placeholder="10"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                Latitude
+            </label>
+
+            <input
+                type="number"
+                step="any"
+                name="lat"
+                placeholder="13.2233"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>
+                Longitude
+            </label>
+
+            <input
+                type="number"
+                step="any"
+                name="lng"
+                placeholder="120.5960"
+            >
+        
+
+        </div>
+
+        <div class="form-group full-width"> 
+            <label> 
+                Select Incident Location 
+            </label> 
+            <div id="reportMap"></div> 
+        </div>
+
+    </div>
+
+    <div class="form-actions">
+
+        <button
+            type="button"
+            class="btn-secondary"
+            data-action="close-create"
+        >
+
+            Cancel
+
+        </button>
+
+        <button
+            type="submit"
+            class="btn-primary"
+        >
+
+            Create Report
+
+        </button>
+
+    </div>
+
+</form>
+        </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- EDIT MODAL -->
+    <div class="modal-backdrop hidden" id="editModal" aria-hidden="true">
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+            <div class="modal-header">
+                <div>
+                    <span class="report-id">EDIT REPORT</span>
+                    <h2 id="editModalTitle">Edit Report Details</h2>
+                </div>
+                <button class="icon-btn" type="button" id="closeEditModal" title="Close">
+                    <i data-lucide="x" size="16"></i>
+                </button>
+            </div>
+            <div class="report-form">
+                <input type="hidden" id="edit-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="edit-title" placeholder="Report title">
+                    </div>
+                    <div class="form-group">
+                        <label>Incident Type</label>
+                        <select id="edit-type">
+                            <option value="FIRE">FIRE</option>
+                            <option value="FLOOD">FLOOD</option>
+                            <option value="MEDICAL">MEDICAL</option>
+                            <option value="ACCIDENT">ACCIDENT</option>
+                            <option value="LANDSLIDE">LANDSLIDE</option>
+                            <option value="RESCUE">RESCUE</option>
+                            <option value="OTHER">OTHER</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="edit-priority">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <select id="edit-location">
+                            <option value="">Select Barangay</option>
+                            <option value="Balansay">Balansay</option>
+                            <option value="Fatima">Fatima</option>
+                            <option value="Tayamaan">Tayamaan</option>
+                            <option value="Payompon">Payompon</option>
+                            <option value="Poblacion 1">Poblacion 1</option>
+                            <option value="Poblacion 2">Poblacion 2</option>
+                            <option value="Poblacion 3">Poblacion 3</option>
+                            <option value="Poblacion 4">Poblacion 4</option>
+                            <option value="Poblacion 5">Poblacion 5</option>
+                            <option value="Poblacion 6">Poblacion 6</option>
+                            <option value="Poblacion 7">Poblacion 7</option>
+                            <option value="Poblacion 8">Poblacion 8</option>
+                            <option value="San Luis">San Luis</option>
+                            <option value="Tangkalan">Tangkalan</option>
+                            <option value="Talabaan">Talabaan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Assigned Unit</label>
+                        <input type="text" id="edit-assigned" placeholder="MDRRMO / Rescue Team">
+                    </div>
+                    <div class="form-group">
+                        <label>Responder</label>
+                        <input type="text" id="edit-responder" placeholder="Responder name">
+                    </div>
+                    <div class="form-group">
+                        <label>ETA Minutes</label>
+                        <input type="number" id="edit-eta" placeholder="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Latitude</label>
+                        <input type="number" step="any" id="edit-lat" placeholder="13.2233">
+                    </div>
+                    <div class="form-group">
+                        <label>Longitude</label>
+                        <input type="number" step="any" id="edit-lng" placeholder="120.5960">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Description</label>
+                        <textarea id="edit-description" rows="4" placeholder="Describe the incident..."></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="closeEditModal2" onclick="document.getElementById('editModal').classList.add('hidden')">Cancel</button>
+                    <button type="button" class="btn-primary" onclick="saveEditReport()">Save Changes</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="../ADMIN/admin.js"></script>
+    <script src="reports.js"></script>
+</body>
+</html>
