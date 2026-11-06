@@ -1,13 +1,27 @@
 {
-  "version": 2,
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "app": {
+      "root": ".",
+      "framework": "express"
+    },
+    "server": {
+      "root": "server",
+      "framework": "express"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/[...path].js"
+      "destination": {
+        "service": "server"
+      }
     },
     {
-      "source": "/",
-      "destination": "/LOGIN/login.html"
+      "source": "/(.*)",
+      "destination": {
+        "service": "app"
+      }
     }
   ]
 }
